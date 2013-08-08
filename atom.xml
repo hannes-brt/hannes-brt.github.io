@@ -4,7 +4,7 @@
   <title><![CDATA[Hannes Bretschneider]]></title>
   <link href="http://hannes-brt.github.io/atom.xml" rel="self"/>
   <link href="http://hannes-brt.github.io/"/>
-  <updated>2013-08-07T20:15:31-04:00</updated>
+  <updated>2013-08-07T21:45:26-04:00</updated>
   <id>http://hannes-brt.github.io/</id>
   <author>
     <name><![CDATA[Hannes Bretschneider]]></name>
@@ -24,10 +24,10 @@ PyCUDA is still under heavy development it is still missing some
 crucial functionality that would make it a real drop-in replacement
 for Numpy. Most importantly, slicing of GPUArrays has only been
 recently implemented in version <code>2013.1</code>, but unfortunately, the
-implementation is a little in that it seems to implement general
-slicing, but actually doesn&rsquo;t. There is also potential for a quite
-subtle bug that may alter the content of your array if you don&rsquo;t pay
-attention.</p>
+implementation is a little lacking in that it seems to implement
+general slicing, but actually doesn&rsquo;t. There is also potential for a
+quite subtle bug that may alter the content of your array if you don&rsquo;t
+pay attention.</p>
 
 <p>First, let&rsquo;s initialize our GPU and create a GPUArray to work on:</p>
 
@@ -155,7 +155,7 @@ creates a new GPUArray and performs a memory copy:</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Now we can use the function as following:</p>
+<p>Now we can use the function as follows:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
