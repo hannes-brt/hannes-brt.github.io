@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: python,pycuda,cuda,gpu | Hannes Bretschneider]]></title>
+  <link href="http://hannes-brt.github.io/blog/categories/python-pycuda-cuda-gpu/atom.xml" rel="self"/>
+  <link href="http://hannes-brt.github.io/"/>
+  <updated>2013-08-07T20:15:31-04:00</updated>
+  <id>http://hannes-brt.github.io/</id>
+  <author>
+    <name><![CDATA[Hannes Bretschneider]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Column-Slicing in PyCUDA]]></title>
+    <link href="http://hannes-brt.github.io/blog/2013/08/07/column-slicing-in-pycuda/"/>
+    <updated>2013-08-07T19:35:00-04:00</updated>
+    <id>http://hannes-brt.github.io/blog/2013/08/07/column-slicing-in-pycuda</id>
+    <content type="html"><![CDATA[<p><a href="http://documen.tician.de/pycuda/index.html">PyCUDA</a>&rsquo;s <code>GPUArray</code>
+class is designed to be an analogue to the Numpy <code>ndarray</code>, but while
+PyCUDA is still under heavy development it is still missing some
+crucial functionality that would make it a real drop-in replacement
+for Numpy. Most importantly, slicing of GPUArrays has only been
+recently implemented in version <code>2013.1</code>, but unfortunately, the
+implementation is a little in that it seems to implement general
+slicing, but actually doesn&rsquo;t. There is also potential for a quite
+subtle bug that may alter the content of your array if you don&rsquo;t pay
+attention.</p>
+
+<p>First, let&rsquo;s initialize our GPU and create a GPUArray to work on:</p>
+
+<p>```python</p>
+
+<blockquote><blockquote><blockquote><p>import numpy as np
+import pycuda.autoinit
+from pycuda import gpuarray
+from pycuda.curandom import rand as curand</p>
+
+<p>float = np.float32
+height = 100
+width = 200
+X = curand((height, width), float)</p>
+
+<p>X.flags.c_contiguous               # New GPUArray is C-contiguous
+True
+```</p></blockquote></blockquote></blockquote>
+
+<p>If we take a column-slice of this array, the returned slice is no
+longer a contiguous block of memory:
+```python</p>
+
+<blockquote><blockquote><blockquote><p>Y = X[:,:100]
+Y.flags.forc                       # Array is no longer contiguous
+False
+```</p></blockquote></blockquote></blockquote>
+
+<p>Unfortunately, most of the operations in <code>GPUArray</code> are not
+implemented for non-contiguous arrays, so using the slicing operator
+to get a column slice actually doesn&rsquo;t have much utility yet. However,
+what&rsquo;s worse, if we get a new view on the non-contiguous array, the
+flag signaling that the array is non-contiguous is discarded and the
+view treats the memory as contiguous:
+```python</p>
+
+<blockquote><blockquote><blockquote><p>Y_view = Y.view()
+Y_view.flags.c_contiguous          # Magically, Y_view appears contiguous now
+True
+Y_view.get() == X.get()[:,:100]       # compare to slicing on CPU
+array([[ True,  True,  True, &hellip;,  True,  True,  True],</p>
+
+<pre><code>   [False, False, False, ..., False, False, False],
+   [False, False, False, ..., False, False, False],
+   ..., 
+   [False, False, False, ..., False, False, False],
+   [False, False, False, ..., False, False, False],
+   [False, False, False, ..., False, False, False]], dtype=bool)
+</code></pre></blockquote></blockquote></blockquote>
+
+<p>```</p>
+
+<p>Ouch, that&rsquo;s not what wanted. The <code>GPUArray.view()</code> function does not
+remember the actual memory layout of <code>Y</code> and therefore the data in all
+rows after the first is wrong.</p>
+
+<p>To work around this, you can use the <code>pycuda.driver.Memcpy2D</code> function
+to copy the data to a new contiguous array. Here is a function that
+creates a new GPUArray and performs a memory copy:
+```python
+def extract_columns(mat, start=0, stop=None):</p>
+
+<pre><code>dtype = mat.dtype
+itemsize = np.dtype(dtype).itemsize
+N, M = mat.shape
+m = stop - start
+
+assert mat.flags.c_contiguous
+assert start &gt;= 0 and stop &lt; M and stop &gt;= 0 and stop &lt; M and stop &gt; start
+
+new_mat = gpuarray.empty((N, m), dtype)
+
+copy = drv.Memcpy2D()
+copy.set_src_device(mat.gpudata)
+copy.src_x_in_bytes = start * itemsize    # Offset of the first column in bytes
+copy.set_dst_device(new_mat.gpudata)
+copy.src_pitch = M * itemsize   # Width of a row in bytes in the source array
+copy.dst_pitch = copy.width_in_bytes = m * itemsize  # Width of sliced row
+copy.height = N
+copy(aligned=True)
+
+return new_mat
+</code></pre>
+
+<p>```</p>
+
+<p>Now we can use the function as following:
+```python</p>
+
+<blockquote><blockquote><blockquote><p>Y = extract_columns(X, 0, 100)
+np.all(Y.get() == X.get()[:,:100]) # Indeed, we got the slice we wanted
+True
+```</p></blockquote></blockquote></blockquote>
+]]></content>
+  </entry>
+  
+</feed>
