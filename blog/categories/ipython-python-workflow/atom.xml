@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ipython,python,workflow, | Hannes Bretschneider]]></title>
   <link href="http://hannes-brt.github.io/blog/categories/ipython-python-workflow/atom.xml" rel="self"/>
   <link href="http://hannes-brt.github.io/"/>
-  <updated>2013-08-11T21:00:55-04:00</updated>
+  <updated>2013-08-11T21:53:52-04:00</updated>
   <id>http://hannes-brt.github.io/</id>
   <author>
     <name><![CDATA[Hannes Bretschneider]]></name>
@@ -68,7 +68,14 @@ there are some unspecified legal issues as hinted at by iPython
 developer
 <a href="http://python.6.x6.nabble.com/IPython-User-Hide-code-cells-in-the-notebook-tp4997151p4997302.html">Brian Granger</a>.</p>
 
-<p>However, it is quite straight-forward to use a little bit of
+<p>In practice, your slides will look similar to this:</p>
+
+<p><img src="/images/reveal_js_with_code_cell.png"></p>
+
+<p>That&rsquo;s great if you want to teach a class on Matplotlib, but quite
+often you&rsquo;d want to hide that code cell.</p>
+
+<p>Indeed, it is quite straight-forward to use a little bit of
 Javascript to simply hide the input cells in the browser when using
 the HTML or Reveal.js output. Here is a Javascript function (from
 Stack Overflow user <a href="http://stackoverflow.com/questions/3336497/javascript-hiding-divs">Felix Kling</a>)
@@ -107,6 +114,10 @@ hideElements(prompt_elements, 0);
 
 
 <p>```</p>
+
+<p>Here&rsquo;s the result on the slide from before:</p>
+
+<p><img src="/images/reveal_js_no_code_cell.png"></p>
 
 <p>Now, magically, you have a clean document, scrubbed of all code that
 you can go on to publish or present. Still, your code is still present
